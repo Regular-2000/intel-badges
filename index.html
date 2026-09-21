@@ -97,6 +97,9 @@ body.amd #nav, body.amd details:not(.amdd), body.amd #topwarn, body.amd #cards, 
 #amdlist{display:flex;flex-direction:column;gap:6px}
 @media (min-width:900px){ #amdlist{display:block;columns:2;column-gap:8px} #list .row, #amdlist .row{break-inside:avoid;margin-bottom:8px} }
 .amd .seg button.on, body.amd #bseg button.on{background:#c8102e}
+.w11{display:inline-block;font-size:10.5px;font-weight:700;color:#0a7a3d;border:1px solid #0a7a3d;border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:1px;white-space:nowrap}
+@media (prefers-color-scheme: dark){ .w11{color:#4fd18b;border-color:#4fd18b} }
+.legend{font-size:12.5px;color:var(--muted);margin:0 0 8px}
 </style>
 </head>
 <body>
@@ -135,6 +138,7 @@ body.amd #nav, body.amd details:not(.amdd), body.amd #topwarn, body.amd #cards, 
 
   <div class="warn" id="topwarn" style="margin:0 0 12px">Stickers are the weakest clue. Palmrests get swapped, badges get re-applied, and near-identical designs cover several gens (4th/5th, 6th–8th, 11th–14th, Ultra S1/S2). When the listing shows a model number (sticker on bottom, BIOS, "System" screen, CPU-Z), trust that instead.</div>
 
+  <p class="legend"><span class="w11">Win 11</span> = officially supported by Windows 11 (Intel 8th gen+, AMD Ryzen 2000+). Older chips can run it only by bypassing the check.</p>
   <div id="list"></div>
   <section id="amd">
     <div class="warn amdnote">AMD stickers change much less than Intel's, so treat them as an era guide. A sticker can tell you roughly the decade (pre-Ryzen vs Ryzen vs Ryzen AI), but only the model number pins down the chip. Ryzen laptop badge images aren’t available to link, so those rows show a description plus a link to photos of real stickers.</div>
@@ -197,7 +201,7 @@ const ERAS = [
   badges:[[LR("0/01/Intel_Core_i7_%282015-2019%29.svg"),"plain (6th+)"],[L("6/6b/Intelbadge0000001core2.png"),"i5 plain"],[L("5/59/I57.png"),"i5 7th Gen"],[L("0/03/Intel_Core_i7_7th_gen.png"),"i7 7th Gen"],[L("4/4e/Intel_Core_i5_8th_gen.png"),"i5 8th Gen"],[L("e/e4/Intel_Core_i7_8th_gen.png"),"i7 8th Gen"],[L("6/6a/I79.png"),"i7 9th Gen"],[L("c/ca/Core_i9_9th_Gen.png"),"i9 9th Gen"],[LR("7/74/Intel_i5_vPro_8th.svg"),"i5 vPro 8th"]],
   tells:'<b>Silver/white square with a light-blue border</b>, blue ring logo, "CORE i5". If it says <b>"7th Gen" / "8th Gen" / "9th Gen"</b>, that settles it. With no gen text it could be 6th, 7th or 8th.',
   models:"6th: i5-6200U, i5-6300U, i7-6600U, i7-6700HQ · 7th: i5-7200U, i5-7300U, i7-7500U, i7-7700HQ · 8th: i5-8250U, i5-8350U, i5-8265U, i7-8650U, i7-8750H · 9th: i7-9750H, i9-9880H",
-  note:"8th gen is the big jump: first quad-core U chips (Windows 11 officially starts at 8th gen). There were no 9th-gen U chips, so a 9th-gen laptop is an H-series gaming or workstation machine. i9 first appeared on laptops with the 8th gen."},
+  note:"8th gen is the big jump: first quad-core U chips (Windows 11 officially starts at 8th gen). Kaby Lake appears twice because the gen number is marketing: 7th-gen Kaby Lake U chips are dual-core, and 8th-gen \"Kaby Lake R\" is the same design made quad-core. There were no 9th-gen U chips, so a 9th-gen laptop is an H-series gaming or workstation machine. i9 first appeared on laptops with the 8th gen."},
 
  {id:"g10", nav:"10th", gen:"10th", yrs:"2019 – 2020", cn:"Comet Lake (10xxxU/H) / Ice Lake (10xxG)", tint:"#8b95a0",
   badges:[[L("5/58/Intel_Core_i7_2019_logo.svg"),"i7 10th Gen"],[L("2/27/Intel_Core_i5_2019_logo.svg"),"i5 10th Gen"],[L("e/e6/Intel_Core_i3_2019_logo.svg"),"i3 10th Gen"],[L("4/4c/Intel_Core_i7_2019_logo_without_10th_Gen.svg"),"no-text variant"],[L("e/eb/Core_i9_10th_gen_vpro.png"),"i9 vPro"]],
@@ -269,20 +273,20 @@ const ROWS = [
  {rid:"r5", go:"g4", t:"5th gen", y:"2015", d:"Broadwell · same shape, bigger bolder “CORE i5” · Core M", im:[[L("0/0c/Intel_Core_i5_Broadwell.svg"),"i5 5th"],[L("e/e0/Intel_Core_M_Broadwell.svg"),"Core M"]]},
  {rid:"r6", go:"g6", grp:1, t:"6th gen <span>(+ some 7th/8th)</span>", y:"2015–16", d:"Skylake · silver square, NO gen text", im:[[L("6/6b/Intelbadge0000001core2.png"),"i5 plain"],[LR("0/01/Intel_Core_i7_%282015-2019%29.svg"),"i7 plain"]]},
  {rid:"r7", go:"g6", t:"7th gen", y:"2016–17", d:"Kaby Lake · silver, “7th Gen”", im:[[L("5/59/I57.png"),"i5 7th Gen"],[L("0/03/Intel_Core_i7_7th_gen.png"),"i7 7th Gen"]]},
- {rid:"r8", go:"g6", t:"8th gen", y:"2017–19", d:"Kaby Lake R / Coffee / Whiskey Lake · “8th Gen”", im:[[L("4/4e/Intel_Core_i5_8th_gen.png"),"i5 8th Gen"],[L("e/e4/Intel_Core_i7_8th_gen.png"),"i7 8th Gen"]]},
- {rid:"r9", go:"g6", t:"9th gen", y:"2018–19", d:"Coffee Lake Refresh · “9th Gen” · laptops: H-series (gaming) only", im:[[L("6/6a/I79.png"),"i7 9th Gen"],[L("c/ca/Core_i9_9th_Gen.png"),"i9 9th Gen"]]},
- {rid:"r10", go:"g10", t:"10th gen", y:"2019–20", d:"Comet / Ice Lake · all grey, “10TH GEN”", im:[[L("2/27/Intel_Core_i5_2019_logo.svg"),"i5 10th"],[L("4/4c/Intel_Core_i7_2019_logo_without_10th_Gen.svg"),"i7 (no-text variant)"]]},
- {rid:"r11", go:"g11", grp:1, t:"11th–14th gen", y:"2020–24", d:"Tiger / Alder / Raptor Lake · flat blue, tier box · identical", im:[[L("d/d0/Intel_Core_i5_2020_logo.svg"),"i5 11th–14th"],["https://commons.wikimedia.org/wiki/Special:FilePath/Intel_Evo_Powered_by_Core_i7_2020_logo.svg?width=300","Evo i7"]]},
- {rid:"rU12", go:"u1", grp:1, t:"Core Ultra Series 1–2", y:"Dec 2023–25", d:"Meteor / Lunar / Arrow Lake · navy, “ULTRA” · identical", im:[[L("7/79/Intel_Core_Ultra_5.svg"),"Ultra 5"],[L("7/77/Intel_Core_Ultra_7.svg"),"Ultra 7"]]},
- {rid:"rC", go:"u1", grp:1, t:"Core 5 / 7 (non-Ultra)", y:"2024–25", d:"Series 1–2 · bright blue, no “ULTRA” · identical", im:[[L("2/28/Intel_Core_5.svg"),"Core 5"],[L("b/bd/Intel_Core_7.svg"),"Core 7"]]},
- {rid:"rU3", go:"u3", t:"Core Ultra Series 3", y:"2026", d:"Panther Lake · near-black, “Series 3”, X7/X9", im:[[L("3/37/Intel_Core_Ultra_X7_Series_3.png"),"Ultra X7"],[L("f/fd/Intel_Core_Ultra_X9_Series_3.png"),"Ultra X9"]]}
+ {rid:"r8", w11:1, go:"g6", t:"8th gen", y:"2017–19", d:"Kaby Lake R / Coffee / Whiskey Lake · “8th Gen” · Kaby Lake R = 7th-gen design made quad-core", im:[[L("4/4e/Intel_Core_i5_8th_gen.png"),"i5 8th Gen"],[L("e/e4/Intel_Core_i7_8th_gen.png"),"i7 8th Gen"]]},
+ {rid:"r9", w11:1, go:"g6", t:"9th gen", y:"2018–19", d:"Coffee Lake Refresh · “9th Gen” · laptops: H-series (gaming) only", im:[[L("6/6a/I79.png"),"i7 9th Gen"],[L("c/ca/Core_i9_9th_Gen.png"),"i9 9th Gen"]]},
+ {rid:"r10", w11:1, go:"g10", t:"10th gen", y:"2019–20", d:"Comet / Ice Lake · all grey, “10TH GEN”", im:[[L("2/27/Intel_Core_i5_2019_logo.svg"),"i5 10th"],[L("4/4c/Intel_Core_i7_2019_logo_without_10th_Gen.svg"),"i7 (no-text variant)"]]},
+ {rid:"r11", w11:1, go:"g11", grp:1, t:"11th–14th gen", y:"2020–24", d:"Tiger / Alder / Raptor Lake · flat blue, tier box · identical", im:[[L("d/d0/Intel_Core_i5_2020_logo.svg"),"i5 11th–14th"],["https://commons.wikimedia.org/wiki/Special:FilePath/Intel_Evo_Powered_by_Core_i7_2020_logo.svg?width=300","Evo i7"]]},
+ {rid:"rU12", w11:1, go:"u1", grp:1, t:"Core Ultra Series 1–2", y:"Dec 2023–25", d:"Meteor / Lunar / Arrow Lake · navy, “ULTRA” · identical", im:[[L("7/79/Intel_Core_Ultra_5.svg"),"Ultra 5"],[L("7/77/Intel_Core_Ultra_7.svg"),"Ultra 7"]]},
+ {rid:"rC", w11:1, go:"u1", grp:1, t:"Core 5 / 7 (non-Ultra)", y:"2024–25", d:"Series 1–2 · bright blue, no “ULTRA” · identical", im:[[L("2/28/Intel_Core_5.svg"),"Core 5"],[L("b/bd/Intel_Core_7.svg"),"Core 7"]]},
+ {rid:"rU3", w11:1, go:"u3", t:"Core Ultra Series 3", y:"2026", d:"Panther Lake · near-black, “Series 3”, X7/X9", im:[[L("3/37/Intel_Core_Ultra_X7_Series_3.png"),"Ultra X7"],[L("f/fd/Intel_Core_Ultra_X9_Series_3.png"),"Ultra X9"]]}
 ];
 const ROWMAP = {1:"r1",2:"r23",3:"r23",4:"r4",5:"r5",6:"r6",7:"r7",8:"r8",9:"r9",10:"r10",11:"r11",12:"r11",13:"r11",14:"r11"};
 const list = document.getElementById("list");
 list.innerHTML = ROWS.map(r => `
   <div class="row${r.grp?" grp":""}" id="${r.rid}">
     <div class="th">${r.im.map(([src,cap])=>`<img src="${src}" alt="${cap}" loading="lazy" referrerpolicy="no-referrer" data-cap="${r.t.replace(/<[^>]+>/g,"")} — ${cap}" onerror="this.style.visibility='hidden'">`).join("")}</div>
-    <div class="tx" data-go="${r.go}"><div class="t1">${r.t} · ${r.y}</div><div class="t2">${r.d}</div></div>
+    <div class="tx" data-go="${r.go}"><div class="t1">${r.t} · ${r.y}${r.w11?'<span class="w11">Win 11</span>':""}</div><div class="t2">${r.d}</div></div>
     <div class="go" data-go="${r.go}" aria-label="details">›</div>
   </div>`).join("");
 
@@ -312,22 +316,22 @@ const AMDROWS = [
  {rid:"aA1", t:"A-Series (1st design)", y:"2011–13", d:"Glossy red “A-SERIES” · Llano / Trinity (A6-3400M, A8-4500M, A10-4600M)", im:[[L("3/31/AMDAseries2011-2013.jpg"),"A-Series 2011–13"]], s:"AMD A-Series 2012 laptop sticker"},
  {rid:"aA2", t:"A-Series (black/red “A”)", y:"2013–16", d:"Black square, big red “A” · Kaveri / Carrizo (A8-6410, A10-7300, A10-8700P)", im:[[L("a/ab/AMDAseries2013.jpg"),"A-Series 2013–16"],[L("0/0d/AMD_Athlon_logotipo.png"),"Athlon 2013–16"]], s:"AMD A10 A8 laptop sticker black red"},
  {rid:"aA3", t:"A-Series 7th gen / Athlon (silver)", y:"2016–19", d:"Silver frame, red logo · Bristol / Stoney Ridge (A9-9420, A6-9220), common in cheap laptops", im:[[L("a/a9/A-series-badge.jpg"),"A-Series 7th gen"],[L("f/ff/Amd_athlon_2016-2018_%28HD%29.png"),"Athlon 2016–18"]], s:"AMD A9 A6 7th generation sticker"},
- {rid:"aAth", t:"Athlon Silver / Gold", y:"2018–23", d:"White/silver badge with Athlon ring · budget Zen (Athlon 3050U, Silver 7120U)", im:[[L("3/3d/Amd_athlon_silver.jpg"),"Athlon Silver"],[L("9/9c/Amd_athlon_gold.png"),"Athlon Gold"]], s:"AMD Athlon Silver laptop sticker"},
- {rid:"aRyz", grp:1, t:"Ryzen 2000–6000", y:"2018–22", d:"Black badge, Ryzen ring logo, tier 3/5/7/9 · early ones often have a separate “Radeon Vega Graphics” sticker · some later ones print “4000/5000 Series”", im:[[L("7/7a/Ryzen.svg"),"Ryzen brand logo (not the badge)"]], s:"AMD Ryzen 5 laptop sticker"},
- {rid:"aRyz7", t:"Ryzen 7000", y:"2023", d:"“7000 Series” badge · <b>orange</b> = Zen 4 (7x40/7x45) · <b>grey</b> = older Zen 2/3 (7x20/7x30/7x35)", im:[], s:"AMD Ryzen 7000 series laptop sticker orange"},
- {rid:"aRyz8", t:"Ryzen 8040 / Ryzen 200", y:"2024–25", d:"Zen 4 refresh (8640U, 8840HS → renamed Ryzen 7 260 etc.) · check the model number", im:[], s:"AMD Ryzen 8040 laptop sticker"},
- {rid:"aAI", t:"Ryzen AI 300 / AI Max / AI 400", y:"2024–26", d:"“Ryzen AI” branding · Zen 5 (AI 9 HX 370, AI 7 350, AI Max+ 395, AI 9 HX 470)", im:[], s:"AMD Ryzen AI 300 laptop sticker"}
+ {rid:"aAth", w11:1, t:"Athlon Silver / Gold", y:"2018–23", d:"White/silver badge with Athlon ring · budget Zen (Athlon 3050U, Silver 7120U)", im:[[L("3/3d/Amd_athlon_silver.jpg"),"Athlon Silver"],[L("9/9c/Amd_athlon_gold.png"),"Athlon Gold"]], s:"AMD Athlon Silver laptop sticker"},
+ {rid:"aRyz", w11:1, grp:1, t:"Ryzen 2000–6000", y:"2018–22", d:"Black badge, Ryzen ring logo, tier 3/5/7/9 · early ones often have a separate “Radeon Vega Graphics” sticker · some later ones print “4000/5000 Series”", im:[[L("7/7a/Ryzen.svg"),"Ryzen brand logo (not the badge)"]], s:"AMD Ryzen 5 laptop sticker"},
+ {rid:"aRyz7", w11:1, t:"Ryzen 7000", y:"2023", d:"“7000 Series” badge · <b>orange</b> = Zen 4 (7x40/7x45) · <b>grey</b> = older Zen 2/3 (7x20/7x30/7x35)", im:[], s:"AMD Ryzen 7000 series laptop sticker orange"},
+ {rid:"aRyz8", w11:1, t:"Ryzen 8040 / Ryzen 200", y:"2024–25", d:"Zen 4 refresh (8640U, 8840HS → renamed Ryzen 7 260 etc.) · check the model number", im:[], s:"AMD Ryzen 8040 laptop sticker"},
+ {rid:"aAI", w11:1, t:"Ryzen AI 300 / AI Max / AI 400", y:"2024–26", d:"“Ryzen AI” branding · Zen 5 (AI 9 HX 370, AI 7 350, AI Max+ 395, AI 9 HX 470)", im:[], s:"AMD Ryzen AI 300 laptop sticker"}
 ];
 document.getElementById("amdlist").innerHTML = AMDROWS.map(r => `
   <div class="row${r.grp?" grp":""}" id="${r.rid}">
     <div class="th">${r.im.length ? r.im.map(([src,cap])=>`<img src="${src}" alt="${cap}" loading="lazy" referrerpolicy="no-referrer" data-cap="${r.t} — ${cap}" onerror="this.style.visibility='hidden'">`).join("") : `<div class="noimg">no badge image online</div>`}</div>
-    <div class="tx" style="cursor:default"><div class="t1">${r.t} · ${r.y}</div><div class="t2">${r.d}</div>
+    <div class="tx" style="cursor:default"><div class="t1">${r.t} · ${r.y}${r.w11?'<span class="w11">Win 11</span>':""}</div><div class="t2">${r.d}</div>
       <a class="src" href="${GI(r.s)}" target="_blank" rel="noopener">photos of real stickers ↗</a></div>
   </div>`).join("");
 
 function decodeAMD(s){
   s = s.replace(/amd/g,"").replace(/\s+/g," ").trim();
-  const R = (txt,rid) => ({txt, rid, amd:true, id:rid});
+  const R = (txt,rid) => ({txt: txt + (["aAth","aRyz","aRyz7","aRyz8","aAI"].includes(rid) && !/Ryzen 1000/.test(txt) ? ' <span class="w11">Win 11</span>' : ' · no official Win 11'), rid, amd:true, id:rid});
   let m;
   // Ryzen AI (300 / Max / 400)
   if(/\bai\b/.test(s) && /ryzen|^ai|\bai\s*(max|[3579])/.test(s)){
@@ -411,13 +415,13 @@ function decode(raw){
   // Core Ultra: "ultra 7 155h", "ultra x9 388h", "u7 258v"
   let m = s.match(/(?:ultra|u)\s*x?\s*([3579])\s*-?\s*([1-4])(\d\d)([a-z]*)/);
   if(m){ const ser=+m[2]; if(ser===4) return {txt:"Core Ultra 400 (Nova Lake) — newer than this chart", id:"u3", rid:"rU3"};
-    return {txt:`Core Ultra <b>Series ${ser}</b> · ${ser===1?"Meteor Lake · Dec 2023–24":ser===2?(m[4].startsWith("v")?"Lunar Lake · late 2024":"Arrow Lake · late 2024–25"):"Panther Lake · 2026"}`, id: ser===3?"u3":"u1", rid: ser===3?"rU3":"rU12"}; }
+    return {txt:`Core Ultra <b>Series ${ser}</b> · ${ser===1?"Meteor Lake · Dec 2023–24":ser===2?(m[4].startsWith("v")?"Lunar Lake · late 2024":"Arrow Lake · late 2024–25"):"Panther Lake · 2026"}`, id: ser===3?"u3":"u1", rid: ser===3?"rU3":"rU12", w:1}; }
   // plain Core 3/5/7 (no i): "core 5 120u", "core 7 240h"
   m = s.match(/core\s*([357])\s*-?\s*([12])(\d\d)([a-z]*)/);
-  if(m) return {txt:`Core ${m[1]} (non-Ultra) <b>Series ${m[2]}</b> · ${m[2]==="1"?"2024 (refreshed 13th-gen silicon)":"2025 (refreshed 12th/13th-gen silicon)"}`, id:"u1", rid:"rC"};
+  if(m) return {txt:`Core ${m[1]} (non-Ultra) <b>Series ${m[2]}</b> · ${m[2]==="1"?"2024 (refreshed 13th-gen silicon)":"2025 (refreshed 12th/13th-gen silicon)"}`, id:"u1", rid:"rC", w:1};
   // Core 2: T7500, P8600, SU7300, Q9000, E8400, L7500
   if(!/i[3579]/.test(s)){ m = s.match(/\b(t|p|su|sl|sp|q|qx|x|e|l|u)\s*-?\s*(\d{4,5})\b/);
-    if(m) return {txt:"<b>Core 2</b> era (Core 2 Duo/Quad) · 2006–2010 — before 1st gen", id:"c2", rid:"rC2b"}; }
+    if(m) return {txt:"<b>Core 2</b> era (Core 2 Duo/Quad) · 2006–2010 — before 1st gen · no official Win 11", id:"c2", rid:"rC2b"}; }
   // Core i: grab digits after i3/i5/i7/i9 or bare number
   m = s.match(/i\s*[3579]\s*-?\s*(\d{3,5})([a-z]*\d?)/) || s.match(/^(\d{3,5})([a-z]*\d?)$/);
   if(m){ const d=m[1], suf=(m[2]||"").toUpperCase(); let g;
@@ -425,7 +429,7 @@ function decode(raw){
     else if(d.length===5) g=+d.slice(0,2);
     else if(d[0]==="1") g=+d.slice(0,2);      // 1035G1, 1135G7, 1235U, 1335U
     else g=+d[0];
-    if(GEN_MAP[g]) return {txt:`<b>${INFO[g]}</b>${suf?` · suffix <code>${suf}</code>`:""}`, id:GEN_MAP[g], rid:ROWMAP[g]};
+    if(GEN_MAP[g]) return {txt:`<b>${INFO[g]}</b>${suf?` · suffix <code>${suf}</code>`:""}${g>=8?' <span class="w11">Win 11</span>':' · no official Win 11'}`, id:GEN_MAP[g], rid:ROWMAP[g]};
   }
   return {txt:"Couldn't parse that — try formats like <code>i5-8250U</code>, <code>1165G7</code>, <code>Ultra 7 155H</code>.", id:null};
 }
@@ -435,7 +439,7 @@ q.addEventListener("input", () => {
   const r = decode(q.value);
   hits.forEach(h=>h.classList.remove("hit")); hits=[];
   if(!r){ out.innerHTML=""; return; }
-  out.innerHTML = r.txt + (r.id?` — <a href="#" id="seeb">see badge ↓</a>`:"");
+  out.innerHTML = r.txt + (r.w?' <span class="w11">Win 11</span>':'') + (r.id?` — <a href="#" id="seeb">see badge ↓</a>`:"");
   if(r.id){ setBrand(r.amd?"amd":"intel");
     hits=[document.getElementById(r.id), document.getElementById(r.rid)].filter(Boolean); hits.forEach(h=>h.classList.add("hit"));
     document.getElementById("seeb").onclick = ev => { ev.preventDefault();
