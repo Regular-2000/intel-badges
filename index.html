@@ -87,7 +87,7 @@ footer a{color:var(--accent)}
 .row.grp{border-left:4px solid var(--accent)}
 body.compact #nav, body.compact details, body.compact #topwarn, body.compact #cards{display:none}
 body:not(.compact) #list{display:none}
-@media (min-width:900px){ #list{display:grid;grid-template-columns:1fr 1fr;gap:8px} body:not(.compact) #list{display:none} }
+@media (min-width:900px){ #list{display:block;columns:2;column-gap:8px} body:not(.compact) #list{display:none} }
 .amdnote{font-size:13px;margin:0 0 10px}
 .row .src{display:inline-block;margin-top:2px;font-size:12px;color:var(--accent);text-decoration:none}
 .row .noimg{height:56px;width:64px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px dashed var(--line);border-radius:5px;font-size:9.5px;color:var(--muted)}
@@ -95,7 +95,7 @@ body:not(.compact) #list{display:none}
 body.amd #amd{display:block}
 body.amd #nav, body.amd details:not(.amdd), body.amd #topwarn, body.amd #cards, body.amd #list, body.amd #vseg{display:none!important}
 #amdlist{display:flex;flex-direction:column;gap:6px}
-@media (min-width:900px){ #amdlist{display:grid;grid-template-columns:1fr 1fr;gap:8px} }
+@media (min-width:900px){ #amdlist{display:block;columns:2;column-gap:8px} #list .row, #amdlist .row{break-inside:avoid;margin-bottom:8px} }
 .amd .seg button.on, body.amd #bseg button.on{background:#c8102e}
 </style>
 </head>
@@ -137,7 +137,7 @@ body.amd #nav, body.amd details:not(.amdd), body.amd #topwarn, body.amd #cards, 
 
   <div id="list"></div>
   <section id="amd">
-    <div class="warn amdnote">AMD stickers change much less than Intel's, so treat them as an era guide. A sticker can tell you roughly the decade (pre-Ryzen vs Ryzen vs Ryzen AI), but only the model number pins down the chip. Ryzen laptop badges aren't online as images I can link, so those rows show text plus a photo-search link.</div>
+    <div class="warn amdnote">AMD stickers change much less than Intel's, so treat them as an era guide. A sticker can tell you roughly the decade (pre-Ryzen vs Ryzen vs Ryzen AI), but only the model number pins down the chip. Ryzen laptop badge images aren’t available to link, so those rows show a description plus a link to photos of real stickers.</div>
     <div id="amdlist"></div>
     <details class="amdd" style="margin-top:12px">
       <summary>AMD number cheat-sheet (Ryzen traps)</summary>
