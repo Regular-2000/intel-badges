@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Intel Badge Finder</title>
+<style>
+:root{
+  --bg:#f4f5f7; --card:#ffffff; --ink:#15171a; --muted:#5d6570; --line:#e1e4e8;
+  --accent:#0068b5; --chip:#eef2f6; --warn-bg:#fff6e0; --warn-ink:#6b4a00; --hit:#e6f2ff;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#101214; --card:#1a1d21; --ink:#e9ecef; --muted:#9aa3ad; --line:#2b3036;
+    --accent:#4da3ff; --chip:#23272c; --warn-bg:#2d2512; --warn-ink:#f1d18a; --hit:#12304d; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:calc(8px + env(safe-area-inset-top)) 0 6px}
+.top{display:flex;align-items:baseline;justify-content:space-between;padding:0 16px}
+h1{font-size:17px;margin:0;letter-spacing:-.01em}
+.top small{color:var(--muted);font-size:12px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px 16px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;
+  color:var(--ink);font-size:11px;font-weight:600;min-width:48px}
+nav a img{width:44px;height:44px;object-fit:contain;border-radius:6px;background:#fff;padding:2px}
+nav a span{white-space:nowrap}
+main{max-width:1180px;margin:0 auto;padding:12px 16px 40px}
+.decoder{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.decoder label{font-weight:600;font-size:14px;display:block;margin-bottom:6px}
+.decoder input{width:100%;font-size:17px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--bg);color:var(--ink)}
+#result{margin-top:8px;font-size:14px;min-height:20px}
+#result b{color:var(--accent)}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
+summary{padding:12px;font-weight:600;cursor:pointer}
+details .body{padding:0 12px 12px;font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+td,th{border-top:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+code{font:12.5px ui-monospace,Menlo,Consolas,monospace;background:var(--chip);padding:1px 4px;border-radius:4px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;scroll-margin-top:118px}
+.card.hit{outline:3px solid var(--accent)}
+.ch{display:flex;gap:10px;align-items:center;padding:10px 12px;border-left:6px solid var(--tint)}
+.gen{font-size:20px;font-weight:800;min-width:54px;line-height:1.05}
+.gen small{display:block;font-size:11px;font-weight:600;color:var(--muted)}
+.meta{flex:1}
+.meta .yrs{font-weight:700}
+.meta .cn{color:var(--muted);font-size:13px}
+.badges{display:flex;gap:8px;overflow-x:auto;padding:4px 12px 8px;-webkit-overflow-scrolling:touch}
+.b{flex:0 0 auto;text-align:center;font-size:11px;color:var(--muted)}
+.b img{height:92px;width:auto;max-width:150px;object-fit:contain;display:block;margin:0 auto 2px;
+  background:#fff;border-radius:6px;padding:3px;cursor:zoom-in}
+.b .miss{height:92px;width:80px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px;font-size:10px}
+.info{padding:0 12px 12px;font-size:14px}
+.info p{margin:4px 0}
+.k{font-weight:700}
+.warn{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:6px 8px;font-size:13px;margin-top:6px}
+.pre{opacity:.92}
+footer{color:var(--muted);font-size:12px;padding:8px 16px 30px;max-width:1180px;margin:0 auto}
+footer a{color:var(--accent)}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+#lb.on{display:flex}
+#lb img{max-width:92vw;max-height:80vh;background:#fff;border-radius:10px;padding:10px}
+#lb p{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#fff;margin:0}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><h1>Intel Badge Finder</h1><small>tap a badge to jump</small></div>
+  <nav id="nav"></nav>
+</header>
+
+<main>
+  <div class="decoder">
+    <label for="q">Have a model number? Type it — it beats the sticker.</label>
+    <input id="q" placeholder="e.g. i5-8250U, 1165G7, Ultra 7 155H, T7500" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div id="result"></div>
+  </div>
+
+  <details>
+    <summary>Quick rules &amp; suffix cheat-sheet</summary>
+    <div class="body">
+      <p><span class="k">Reading the number:</span> <code>i5-520M</code> 3 digits = 1st gen · <code>i5-8250U</code> first digit = gen (2nd–9th) · <code>i5-10210U</code>, <code>i7-12700H</code> first two digits = gen (10th–14th) · <code>i5-1035G1</code>, <code>i5-1135G7</code>, <code>i5-1235U</code> 4 digits starting "1" = first two digits (10th–13th) · <code>Ultra 7 155H</code> first digit = Series (1/2/3).</p>
+      <table>
+        <tr><th>Suffix</th><th>Meaning</th></tr>
+        <tr><td><code>M</code> / <code>QM</code> / <code>MQ</code></td><td>Mobile / quad-core mobile (1st–4th gen)</td></tr>
+        <tr><td><code>U</code></td><td>Low-power ultrabook/business (15 W)</td></tr>
+        <tr><td><code>Y</code>, Core M</td><td>Very low power, fanless-type (tablets, 12" ultralights)</td></tr>
+        <tr><td><code>H</code> / <code>HQ</code> / <code>HK</code></td><td>Performance laptop (gaming / workstation); K = unlocked</td></tr>
+        <tr><td><code>G1</code>/<code>G4</code>/<code>G7</code></td><td>10th-gen Ice Lake &amp; 11th-gen Tiger Lake; higher = better iGPU</td></tr>
+        <tr><td><code>P</code></td><td>12th/13th gen, mid-power thin &amp; light (28 W)</td></tr>
+        <tr><td><code>HX</code></td><td>Desktop-class laptop chip (big gaming laptops)</td></tr>
+        <tr><td><code>V</code></td><td>Core Ultra Series 2 Lunar Lake — RAM soldered on the CPU package</td></tr>
+        <tr><td><code>K</code> / <code>F</code> / <code>T</code></td><td>Desktop: unlocked / no iGPU / low-power</td></tr>
+      </table>
+      <p style="margin-top:8px"><span class="k">vPro</span> on the badge = business-managed chip (Latitude, EliteBook, ThinkPad T/X). It uses the same styling as its era, so it doesn't change the gen.</p>
+      <p><span class="k">Celeron / Pentium / Atom</span> stickers follow the same styling eras. Use them to guess the era only, not the performance.</p>
+    </div>
+  </details>
+
+  <div class="warn" style="margin:0 0 12px">Stickers are the weakest clue. Palmrests get swapped, badges get re-applied, and near-identical designs cover several gens (4th/5th, 6th–8th, 11th–14th, Ultra S1/S2). When the listing shows a model number (sticker on bottom, BIOS, "System" screen, CPU-Z), trust that instead.</div>
+
+  <div class="grid" id="cards"></div>
+</main>
+
+<footer>
+  Badge images are loaded live from <a href="https://logos.fandom.com/wiki/Intel_Core/Models">Logopedia</a> (and one from Wikimedia Commons) and aren't stored in this file, so the page needs internet. Badges © Intel. Built Sept 2026. Next up is "Nova Lake" (Core Ultra 400), expected at the end of 2026 or early 2027.
+</footer>
+
+<div id="lb"><img alt=""><p></p></div>
+
+<script>
+const L = p => "https://static.wikia.nocookie.net/logopedia/images/" + p + "/revision/latest/scale-to-width-down/300";
+const LR = p => "https://static.wikia.nocookie.net/logopedia/images/" + p + "/revision/latest";
+
+const ERAS = [
+ {id:"c2", nav:"Core 2", gen:"pre", sub:"Core 2", yrs:"2006–2010", cn:"Core 2 Duo / Quad (Merom, Penryn)", tint:"#7a8691", pre:true,
+  badges:[[L("9/91/Intel_Core_2_Duo_%282006%29.svg"),"2006–08"],[L("d/d5/Intel_Core2_Duo2009.svg"),"2009–10"]],
+  tells:'Says <b>"Core 2 Duo" / "Core 2 Quad"</b>. The 2009 version uses the same glossy chip-pattern style as 1st-gen Core i, but with a big "2" where the i-number would be.',
+  models:"T5500, T7500, P8600, T9400, SU7300, Q9000", note:"Before 1st gen. Common in very old lots."},
+
+ {id:"g1", nav:"1st", gen:"1st", yrs:"2010 (laptops) · 2008–09 desktop", cn:"Nehalem / Westmere — Arrandale, Clarksfield", tint:"#1f6fb2",
+  badges:[[L("c/c0/Intel_Core_i7_logo_%282009%29.png"),"i7"],[L("3/3d/Intel_Core_i5_%282009-2011%29.svg"),"i5"],[L("e/e4/Core_i3_Logo.png"),"i3"],[L("f/f9/Intel_Core_i5_vPro_%282010%29.svg"),"i5 vPro"],[L("b/b4/Intel_Core_i7_%282008%29.svg"),"2008 desktop i7"]],
+  tells:'Glossy blue with a <b>circuit pattern in the top-right corner</b> and a <b>big faded "i3/i5/i7"</b> behind the word CORE. "inside" is tiny, bottom-right.',
+  models:"i3-330M, i5-520M, i5-540M, i7-620M, i7-720QM", note:"Model has 3 digits and no leading gen digit."},
+
+ {id:"g2", nav:"2nd–3rd", gen:"2nd", sub:"&amp; 3rd", yrs:"2011 (2nd) · 2012 (3rd)", cn:"Sandy Bridge (2nd) / Ivy Bridge (3rd)", tint:"#1b8bd1",
+  badges:[[L("6/62/Intel_Core_i7_logo.svg"),"i7"],[L("b/b2/Intel_Core_i5_logo.svg"),"i5"],[L("b/b5/Intel_Core_i3_logo.svg"),"i3"],[L("f/f3/Intel_Core_i5_vPro.svg"),"i5 vPro"]],
+  tells:'Two-tone: <b>"intel inside" on top, a solid blue bar at the bottom reading "CORE i5"</b>, with a gold/green circuit strip between them. Wider than tall.',
+  models:"2nd: i5-2520M, i7-2620M, i7-2720QM · 3rd: i5-3320M, i5-3317U, i7-3520M, i7-3610QM",
+  note:"2nd and 3rd gen share the exact same badge. The only way to split them is the model number (2xxx vs 3xxx)."},
+
+ {id:"g4", nav:"4th–5th", gen:"4th", sub:"&amp; 5th", yrs:"2013 (4th) · 2015 (5th)", cn:"Haswell (4th) / Broadwell (5th)", tint:"#2aa0dc",
+  badges:[[L("f/fc/Intel_Core_i7_Haswell.svg"),"i7 4th"],[L("c/cc/Intel_Core_i5_Haswell.svg"),"i5 4th"],[L("f/fb/Intel_Core_i3_Haswell.svg"),"i3 4th"],[L("0/0c/Intel_Core_i5_Broadwell.svg"),"i5 5th"],[L("a/af/Intel_Core_i7_vPro_Haswell.svg"),"i7 vPro"],[L("e/e0/Intel_Core_M_Broadwell.svg"),"Core M (5th)"]],
+  tells:'<b>Taller than wide</b> (portrait). Circuit pattern across the top, round "intel" logo, small "inside", then "CORE i5" at the bottom. No blue bar.',
+  models:"4th: i5-4300U, i7-4600U, i5-4200M, i7-4700MQ · 5th: i5-5200U, i5-5300U, i7-5600U",
+  note:"4th and 5th differ only by a slight font change, so treat them as the same on photos. The 5th gen was mostly U-series business laptops."},
+
+ {id:"g6", nav:"6th–9th", gen:"6th", sub:"– 9th", yrs:"2015 – 2019", cn:"Skylake (6th) · Kaby Lake (7th) · Kaby Lake R / Coffee / Whiskey Lake (8th) · Coffee Lake Refresh (9th)", tint:"#5aa9d6",
+  badges:[[LR("0/01/Intel_Core_i7_%282015-2019%29.svg"),"plain (6th+)"],[L("6/6b/Intelbadge0000001core2.png"),"i5 plain"],[L("5/59/I57.png"),"i5 7th Gen"],[L("0/03/Intel_Core_i7_7th_gen.png"),"i7 7th Gen"],[L("4/4e/Intel_Core_i5_8th_gen.png"),"i5 8th Gen"],[L("e/e4/Intel_Core_i7_8th_gen.png"),"i7 8th Gen"],[L("6/6a/I79.png"),"i7 9th Gen"],[L("c/ca/Core_i9_9th_Gen.png"),"i9 9th Gen"],[LR("7/74/Intel_i5_vPro_8th.svg"),"i5 vPro 8th"]],
+  tells:'<b>Silver/white square with a light-blue border</b>, blue ring logo, "CORE i5". If it says <b>"7th Gen" / "8th Gen" / "9th Gen"</b>, that settles it. With no gen text it could be 6th, 7th or 8th.',
+  models:"6th: i5-6200U, i5-6300U, i7-6600U, i7-6700HQ · 7th: i5-7200U, i5-7300U, i7-7500U, i7-7700HQ · 8th: i5-8250U, i5-8350U, i5-8265U, i7-8650U, i7-8750H · 9th: i7-9750H, i9-9880H",
+  note:"8th gen is the big jump: first quad-core U chips (Windows 11 officially starts at 8th gen). There were no 9th-gen U chips, so a 9th-gen laptop is an H-series gaming or workstation machine. i9 first appeared on laptops with the 8th gen."},
+
+ {id:"g10", nav:"10th", gen:"10th", yrs:"2019 – 2020", cn:"Comet Lake (10xxxU/H) / Ice Lake (10xxG)", tint:"#8b95a0",
+  badges:[[L("5/58/Intel_Core_i7_2019_logo.svg"),"i7 10th Gen"],[L("2/27/Intel_Core_i5_2019_logo.svg"),"i5 10th Gen"],[L("e/e6/Intel_Core_i3_2019_logo.svg"),"i3 10th Gen"],[L("4/4c/Intel_Core_i7_2019_logo_without_10th_Gen.svg"),"no-text variant"],[L("e/eb/Core_i9_10th_gen_vpro.png"),"i9 vPro"]],
+  tells:'<b>Grey/silver metallic, no blue</b>. Condensed "CORE i5" in dark grey with <b>"10TH GEN"</b> underneath. It’s the only all-grey badge, so it’s easy to spot.',
+  models:"Comet Lake: i5-10210U, i5-10310U, i7-10510U, i7-10610U, i7-10750H · Ice Lake: i5-1035G1/G4, i7-1065G7",
+  note:'"G" suffix with 4 digits (1035G1) = Ice Lake 10th gen, not 1st gen.'},
+
+ {id:"g11", nav:"11th–14th", gen:"11th", sub:"– 14th", yrs:"2020 – 2024", cn:"Tiger Lake (11th) · Alder Lake (12th) · Raptor Lake (13th) · Raptor Lake Refresh (14th)", tint:"#0071c5",
+  badges:[[L("d/d2/Intel_Core_i7_2020_logo.svg"),"i7"],[L("d/d0/Intel_Core_i5_2020_logo.svg"),"i5"],[L("8/88/Intel_Core_i3_2020_logo.svg"),"i3"],[L("c/c5/Intel_Core_i9_2020_logo.svg"),"i9"],[L("6/62/Intel_Core_i7_vPro_2020_logo.svg"),"i7 vPro"],["https://commons.wikimedia.org/wiki/Special:FilePath/Intel_Evo_Powered_by_Core_i7_2020_logo.svg?width=300","Evo (premium)"]],
+  tells:'<b>Flat solid blue, no gloss or circuits</b>. Small "intel" top-left, big "CORE" in the middle, <b>tier in a small box bottom-right</b> ("i5"). i3 is lightest blue and i9 darkest/purple. The black "evo" badge only appears on premium thin-and-lights.',
+  models:"11th: i5-1135G7, i5-1145G7, i7-1165G7, i7-1185G7, i7-11800H · 12th: i5-1235U, i7-1255U, i5-1240P, i7-1260P, i7-12700H · 13th: i5-1335U, i7-1355U, i7-13700H, i9-13900HX · 14th: i7-14700HX, i9-14900HX",
+  note:"All four gens use the same badge, so you can't narrow it further from the sticker. 14th gen on laptops is HX (big gaming) only; thin laptops went from 13th gen straight to Core Ultra."},
+
+ {id:"u1", nav:"Ultra S1–2", gen:"Ultra", sub:"Series 1 &amp; 2", yrs:"Dec 2023 – 2025", cn:"Meteor Lake (S1) · Lunar Lake / Arrow Lake (S2)", tint:"#1e2a78",
+  badges:[[L("7/77/Intel_Core_Ultra_7.svg"),"Ultra 7"],[L("7/79/Intel_Core_Ultra_5.svg"),"Ultra 5"],[L("2/20/Intel_Core_Ultra_9.svg"),"Ultra 9"],[L("b/bd/Intel_Core_7.svg"),"Core 7 (non-Ultra)"],[L("2/28/Intel_Core_5.svg"),"Core 5 (non-Ultra)"]],
+  tells:'New wordmark: <b>"intel" stacked over "CORE" with a dot grid</b> and a number (5/7/9) bottom-right, <b>no "i"</b>. <b>Dark navy with "ULTRA"</b> = Core Ultra. <b>Bright blue with no "ULTRA"</b> = plain Core 5/7, which is a cheaper chip.',
+  models:"S1: Ultra 5 125U/125H, Ultra 7 155U/155H/165U · S2: Ultra 5 226V, Ultra 7 258V, Ultra 7 255H, Ultra 9 275HX, Ultra 9 285K · plain Core: Core 5 120U, Core 7 150U (S1), Core 5 210H, Core 7 240H (S2)",
+  note:"Series 1 and 2 badges are the same. The first digit of the model tells you the series (1xx vs 2xx). Plain \"Core 5 120U / Core 7 150U\" chips are really refreshed 13th-gen silicon."},
+
+ {id:"u3", nav:"Ultra S3", gen:"Ultra", sub:"Series 3", yrs:"Jan 2026 →", cn:"Panther Lake", tint:"#0b0f2e",
+  badges:[[L("3/37/Intel_Core_Ultra_X7_Series_3.png"),"Ultra X7"],[L("f/fd/Intel_Core_Ultra_X9_Series_3.png"),"Ultra X9"]],
+  tells:'Near-black badge with <b>"Series 3"</b> printed at the top. <b>"X7"/"X9"</b> = top models with the big Arc iGPU.',
+  models:"Ultra X9 388H, Ultra 9 386H, Ultra 7 365",
+  note:"Non-X Series 3 badges may look close to Series 1/2, so check the 3xx model number. Next is \"Nova Lake\" (Core Ultra 400), expected late 2026 / early 2027."}
+];
+
+const GEN_MAP = {
+  1:"g1",2:"g2",3:"g2",4:"g4",5:"g4",6:"g6",7:"g6",8:"g6",9:"g6",10:"g10",11:"g11",12:"g11",13:"g11",14:"g11"
+};
+const INFO = {
+  1:"1st gen · Nehalem/Westmere · 2010 laptops",2:"2nd gen · Sandy Bridge · 2011",3:"3rd gen · Ivy Bridge · 2012",
+  4:"4th gen · Haswell · 2013",5:"5th gen · Broadwell · 2015",6:"6th gen · Skylake · 2015–16",
+  7:"7th gen · Kaby Lake · 2016–17",8:"8th gen · Kaby Lake R / Coffee / Whiskey Lake · 2017–19",
+  9:"9th gen · Coffee Lake Refresh · 2018–19",10:"10th gen · Comet Lake / Ice Lake · 2019–20",
+  11:"11th gen · Tiger Lake · 2020–21",12:"12th gen · Alder Lake · 2022",13:"13th gen · Raptor Lake · 2023",
+  14:"14th gen · Raptor Lake Refresh · 2023–24"
+};
+
+// ---------- render ----------
+const nav = document.getElementById("nav"), cards = document.getElementById("cards");
+for (const e of ERAS){
+  const label = e.gen + (e.sub ? " " + e.sub.replace("&amp;","&") : "");
+  nav.insertAdjacentHTML("beforeend",
+    `<a href="#${e.id}"><img src="${e.badges[0][0]}" alt="" loading="lazy" referrerpolicy="no-referrer"><span>${e.nav}</span></a>`);
+  const bs = e.badges.map(([src,cap]) =>
+    `<div class="b"><img src="${src}" alt="${cap}" loading="lazy" referrerpolicy="no-referrer" data-cap="${label} — ${cap}" onerror="this.outerHTML='<div class=miss>image<br>unavailable</div>'">${cap}</div>`).join("");
+  cards.insertAdjacentHTML("beforeend", `
+  <section class="card${e.pre?" pre":""}" id="${e.id}" style="--tint:${e.tint}">
+    <div class="ch"><div class="gen">${e.gen==="pre"?"Pre":e.gen}<small>${e.sub||"gen"}</small></div>
+      <div class="meta"><div class="yrs">${e.yrs}</div><div class="cn">${e.cn}</div></div></div>
+    <div class="badges">${bs}</div>
+    <div class="info">
+      <p><span class="k">Spot it:</span> ${e.tells}</p>
+      <p><span class="k">Typical models:</span> ${e.models}</p>
+      <div class="warn">${e.note}</div>
+    </div>
+  </section>`);
+}
+
+// ---------- lightbox ----------
+const lb = document.getElementById("lb");
+cards.addEventListener("click", ev => {
+  const im = ev.target.closest(".b img"); if(!im) return;
+  lb.querySelector("img").src = im.src.replace(/scale-to-width-down\/\d+/,"scale-to-width-down/600");
+  lb.querySelector("p").textContent = im.dataset.cap;
+  lb.classList.add("on");
+});
+lb.addEventListener("click", () => lb.classList.remove("on"));
+
+// ---------- decoder ----------
+function decode(raw){
+  let s = raw.toLowerCase().replace(/intel|®|™|processor|cpu/g,"").replace(/[\s_]+/g," ").trim();
+  if(!s) return null;
+  // Core Ultra: "ultra 7 155h", "ultra x9 388h", "u7 258v"
+  let m = s.match(/(?:ultra|u)\s*x?\s*([3579])\s*-?\s*([1-4])(\d\d)([a-z]*)/);
+  if(m){ const ser=+m[2]; if(ser===4) return {txt:"Core Ultra 400 (Nova Lake) — newer than this chart", id:"u3"};
+    return {txt:`Core Ultra <b>Series ${ser}</b> · ${ser===1?"Meteor Lake · Dec 2023–24":ser===2?(m[4].startsWith("v")?"Lunar Lake · late 2024":"Arrow Lake · late 2024–25"):"Panther Lake · 2026"}`, id: ser===3?"u3":"u1"}; }
+  // plain Core 3/5/7 (no i): "core 5 120u", "core 7 240h"
+  m = s.match(/core\s*([357])\s*-?\s*([12])(\d\d)([a-z]*)/);
+  if(m) return {txt:`Core ${m[1]} (non-Ultra) <b>Series ${m[2]}</b> · ${m[2]==="1"?"2024 (refreshed 13th-gen silicon)":"2025 (refreshed 12th/13th-gen silicon)"}`, id:"u1"};
+  // Core 2: T7500, P8600, SU7300, Q9000, E8400, L7500
+  if(!/i[3579]/.test(s)){ m = s.match(/\b(t|p|su|sl|sp|q|qx|x|e|l|u)\s*-?\s*(\d{4,5})\b/);
+    if(m) return {txt:"<b>Core 2</b> era (Core 2 Duo/Quad) · 2006–2010 — before 1st gen", id:"c2"}; }
+  // Core i: grab digits after i3/i5/i7/i9 or bare number
+  m = s.match(/i\s*[3579]\s*-?\s*(\d{3,5})([a-z]*\d?)/) || s.match(/^(\d{3,5})([a-z]*\d?)$/);
+  if(m){ const d=m[1], suf=(m[2]||"").toUpperCase(); let g;
+    if(d.length===3) g=1;
+    else if(d.length===5) g=+d.slice(0,2);
+    else if(d[0]==="1") g=+d.slice(0,2);      // 1035G1, 1135G7, 1235U, 1335U
+    else g=+d[0];
+    if(GEN_MAP[g]) return {txt:`<b>${INFO[g]}</b>${suf?` · suffix <code>${suf}</code>`:""}`, id:GEN_MAP[g]};
+  }
+  return {txt:"Couldn't parse that — try formats like <code>i5-8250U</code>, <code>1165G7</code>, <code>Ultra 7 155H</code>.", id:null};
+}
+const q=document.getElementById("q"), out=document.getElementById("result");
+let lastHit=null, t;
+q.addEventListener("input", () => {
+  const r = decode(q.value);
+  if(lastHit){ lastHit.classList.remove("hit"); lastHit=null; }
+  if(!r){ out.innerHTML=""; return; }
+  out.innerHTML = r.txt + (r.id?` — <a href="#${r.id}">see badge ↓</a>`:"");
+  if(r.id){ lastHit=document.getElementById(r.id); lastHit.classList.add("hit"); }
+});
+q.addEventListener("keydown", e => { if(e.key==="Enter"){ const a=out.querySelector("a"); if(a){ q.blur(); a.click(); } }});
+</script>
+</body>
+</html>
