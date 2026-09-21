@@ -70,11 +70,28 @@ footer a{color:var(--accent)}
 #lb.on{display:flex}
 #lb img{max-width:92vw;max-height:80vh;background:#fff;border-radius:10px;padding:10px}
 #lb p{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#fff;margin:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font-family:inherit;font-weight:600;font-size:12px;line-height:1;padding:6px 10px;border:0;background:var(--card);color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}
+#list{display:flex;flex-direction:column;gap:6px}
+.row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 8px;scroll-margin-top:70px}
+.row.hit{outline:3px solid var(--accent)}
+.row .th{display:flex;gap:4px;flex:0 0 148px;width:148px}
+.row .th img{height:56px;width:auto;max-width:72px;object-fit:contain;background:#fff;border-radius:5px;padding:2px;cursor:zoom-in}
+.row .tx{flex:1;min-width:0;cursor:pointer}
+.row .t1{font-weight:700;font-size:14.5px;line-height:1.25}
+.row .t1 span{color:var(--muted);font-weight:600}
+.row .t2{color:var(--muted);font-size:12.5px;line-height:1.3}
+.row .go{color:var(--muted);font-size:18px;padding:0 2px;cursor:pointer}
+.row.grp{border-left:4px solid var(--accent)}
+body.compact #nav, body.compact details, body.compact #topwarn, body.compact #cards{display:none}
+body:not(.compact) #list{display:none}
+@media (min-width:900px){ #list{display:grid;grid-template-columns:1fr 1fr;gap:8px} body:not(.compact) #list{display:none} }
 </style>
 </head>
 <body>
 <header>
-  <div class="top"><h1>Intel Badge Finder</h1><small>tap a badge to jump</small></div>
+  <div class="top"><h1>Intel Badge Finder</h1><div class="seg" role="group" aria-label="View"><button data-m="compact">Compact</button><button data-m="detail">Detailed</button></div></div>
   <nav id="nav"></nav>
 </header>
 
@@ -106,8 +123,9 @@ footer a{color:var(--accent)}
     </div>
   </details>
 
-  <div class="warn" style="margin:0 0 12px">Stickers are the weakest clue. Palmrests get swapped, badges get re-applied, and near-identical designs cover several gens (4th/5th, 6th–8th, 11th–14th, Ultra S1/S2). When the listing shows a model number (sticker on bottom, BIOS, "System" screen, CPU-Z), trust that instead.</div>
+  <div class="warn" id="topwarn" style="margin:0 0 12px">Stickers are the weakest clue. Palmrests get swapped, badges get re-applied, and near-identical designs cover several gens (4th/5th, 6th–8th, 11th–14th, Ultra S1/S2). When the listing shows a model number (sticker on bottom, BIOS, "System" screen, CPU-Z), trust that instead.</div>
 
+  <div id="list"></div>
   <div class="grid" id="cards"></div>
 </main>
 
@@ -208,10 +226,55 @@ for (const e of ERAS){
   </section>`);
 }
 
+
+// ---------- compact rows: one per visually distinct sticker ----------
+const ROWS = [
+ {rid:"rC2a", go:"c2", t:"Core 2 (old style)", y:"2006–08", d:"Core 2 Duo/Quad · white/blue swoosh, no circuit pattern", im:[[L("9/91/Intel_Core_2_Duo_%282006%29.svg"),"Core 2 Duo 2006"]]},
+ {rid:"rC2b", go:"c2", t:"Core 2 (new style)", y:"2009–10", d:"Circuit corner + big faded “2” · pre-1st gen", im:[[L("d/d5/Intel_Core2_Duo2009.svg"),"Core 2 Duo 2009"]]},
+ {rid:"r1d", go:"g1", t:"1st gen desktop i7", y:"2008–09", d:"Nehalem · rounded glossy blue, small “Core i7” · desktops only", im:[[L("b/b4/Intel_Core_i7_%282008%29.svg"),"i7 2008"]]},
+ {rid:"r1", go:"g1", t:"1st gen", y:"2010", d:"Arrandale / Clarksfield · big faded i3/i5/i7 behind CORE", im:[[L("3/3d/Intel_Core_i5_%282009-2011%29.svg"),"i5 1st gen"],[L("c/c0/Intel_Core_i7_logo_%282009%29.png"),"i7 1st gen"]]},
+ {rid:"r23", go:"g2", grp:1, t:"2nd–3rd gen", y:"2011–12", d:"Sandy / Ivy Bridge · blue bar “CORE i5” at bottom · identical", im:[[L("b/b2/Intel_Core_i5_logo.svg"),"i5 2nd/3rd"],[L("6/62/Intel_Core_i7_logo.svg"),"i7 2nd/3rd"]]},
+ {rid:"r4", go:"g4", t:"4th gen", y:"2013", d:"Haswell · portrait, thin/condensed “CORE i5”", im:[[L("c/cc/Intel_Core_i5_Haswell.svg"),"i5 4th"],[L("f/fc/Intel_Core_i7_Haswell.svg"),"i7 4th"]]},
+ {rid:"r5", go:"g4", t:"5th gen", y:"2015", d:"Broadwell · same shape, bigger bolder “CORE i5” · Core M", im:[[L("0/0c/Intel_Core_i5_Broadwell.svg"),"i5 5th"],[L("e/e0/Intel_Core_M_Broadwell.svg"),"Core M"]]},
+ {rid:"r6", go:"g6", grp:1, t:"6th gen <span>(+ some 7th/8th)</span>", y:"2015–16", d:"Skylake · silver square, NO gen text", im:[[L("6/6b/Intelbadge0000001core2.png"),"i5 plain"],[LR("0/01/Intel_Core_i7_%282015-2019%29.svg"),"i7 plain"]]},
+ {rid:"r7", go:"g6", t:"7th gen", y:"2016–17", d:"Kaby Lake · silver, “7th Gen”", im:[[L("5/59/I57.png"),"i5 7th Gen"],[L("0/03/Intel_Core_i7_7th_gen.png"),"i7 7th Gen"]]},
+ {rid:"r8", go:"g6", t:"8th gen", y:"2017–19", d:"Kaby Lake R / Coffee / Whiskey Lake · “8th Gen”", im:[[L("4/4e/Intel_Core_i5_8th_gen.png"),"i5 8th Gen"],[L("e/e4/Intel_Core_i7_8th_gen.png"),"i7 8th Gen"]]},
+ {rid:"r9", go:"g6", t:"9th gen", y:"2018–19", d:"Coffee Lake Refresh · “9th Gen” · laptops: H-series (gaming) only", im:[[L("6/6a/I79.png"),"i7 9th Gen"],[L("c/ca/Core_i9_9th_Gen.png"),"i9 9th Gen"]]},
+ {rid:"r10", go:"g10", t:"10th gen", y:"2019–20", d:"Comet / Ice Lake · all grey, “10TH GEN”", im:[[L("2/27/Intel_Core_i5_2019_logo.svg"),"i5 10th"],[L("4/4c/Intel_Core_i7_2019_logo_without_10th_Gen.svg"),"i7 (no-text variant)"]]},
+ {rid:"r11", go:"g11", grp:1, t:"11th–14th gen", y:"2020–24", d:"Tiger / Alder / Raptor Lake · flat blue, tier box · identical", im:[[L("d/d0/Intel_Core_i5_2020_logo.svg"),"i5 11th–14th"],["https://commons.wikimedia.org/wiki/Special:FilePath/Intel_Evo_Powered_by_Core_i7_2020_logo.svg?width=300","Evo i7"]]},
+ {rid:"rU12", go:"u1", grp:1, t:"Core Ultra Series 1–2", y:"Dec 2023–25", d:"Meteor / Lunar / Arrow Lake · navy, “ULTRA” · identical", im:[[L("7/79/Intel_Core_Ultra_5.svg"),"Ultra 5"],[L("7/77/Intel_Core_Ultra_7.svg"),"Ultra 7"]]},
+ {rid:"rC", go:"u1", grp:1, t:"Core 5 / 7 (non-Ultra)", y:"2024–25", d:"Series 1–2 · bright blue, no “ULTRA” · identical", im:[[L("2/28/Intel_Core_5.svg"),"Core 5"],[L("b/bd/Intel_Core_7.svg"),"Core 7"]]},
+ {rid:"rU3", go:"u3", t:"Core Ultra Series 3", y:"2026", d:"Panther Lake · near-black, “Series 3”, X7/X9", im:[[L("3/37/Intel_Core_Ultra_X7_Series_3.png"),"Ultra X7"],[L("f/fd/Intel_Core_Ultra_X9_Series_3.png"),"Ultra X9"]]}
+];
+const ROWMAP = {1:"r1",2:"r23",3:"r23",4:"r4",5:"r5",6:"r6",7:"r7",8:"r8",9:"r9",10:"r10",11:"r11",12:"r11",13:"r11",14:"r11"};
+const list = document.getElementById("list");
+list.innerHTML = ROWS.map(r => `
+  <div class="row${r.grp?" grp":""}" id="${r.rid}">
+    <div class="th">${r.im.map(([src,cap])=>`<img src="${src}" alt="${cap}" loading="lazy" referrerpolicy="no-referrer" data-cap="${r.t.replace(/<[^>]+>/g,"")} — ${cap}" onerror="this.style.visibility='hidden'">`).join("")}</div>
+    <div class="tx" data-go="${r.go}"><div class="t1">${r.t} · ${r.y}</div><div class="t2">${r.d}</div></div>
+    <div class="go" data-go="${r.go}" aria-label="details">›</div>
+  </div>`).join("");
+
+// ---------- view mode ----------
+function setMode(m){
+  document.body.classList.toggle("compact", m==="compact");
+  document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on", b.dataset.m===m));
+  try{ localStorage.setItem("ibf-mode", m); }catch(e){}
+}
+let mode = "compact";
+try{ mode = localStorage.getItem("ibf-mode") || "compact"; }catch(e){}
+setMode(mode);
+document.querySelector(".seg").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ setMode(b.dataset.m); scrollTo(0,0); } });
+list.addEventListener("click", e => {
+  const g = e.target.closest("[data-go]"); if(!g) return;
+  setMode("detail");
+  requestAnimationFrame(()=>document.getElementById(g.dataset.go).scrollIntoView({behavior:"smooth"}));
+});
+
 // ---------- lightbox ----------
 const lb = document.getElementById("lb");
-cards.addEventListener("click", ev => {
-  const im = ev.target.closest(".b img"); if(!im) return;
+document.addEventListener("click", ev => {
+  const im = ev.target.closest(".b img, .row .th img"); if(!im) return;
   lb.querySelector("img").src = im.src.replace(/scale-to-width-down\/\d+/,"scale-to-width-down/600");
   lb.querySelector("p").textContent = im.dataset.cap;
   lb.classList.add("on");
@@ -224,14 +287,14 @@ function decode(raw){
   if(!s) return null;
   // Core Ultra: "ultra 7 155h", "ultra x9 388h", "u7 258v"
   let m = s.match(/(?:ultra|u)\s*x?\s*([3579])\s*-?\s*([1-4])(\d\d)([a-z]*)/);
-  if(m){ const ser=+m[2]; if(ser===4) return {txt:"Core Ultra 400 (Nova Lake) — newer than this chart", id:"u3"};
-    return {txt:`Core Ultra <b>Series ${ser}</b> · ${ser===1?"Meteor Lake · Dec 2023–24":ser===2?(m[4].startsWith("v")?"Lunar Lake · late 2024":"Arrow Lake · late 2024–25"):"Panther Lake · 2026"}`, id: ser===3?"u3":"u1"}; }
+  if(m){ const ser=+m[2]; if(ser===4) return {txt:"Core Ultra 400 (Nova Lake) — newer than this chart", id:"u3", rid:"rU3"};
+    return {txt:`Core Ultra <b>Series ${ser}</b> · ${ser===1?"Meteor Lake · Dec 2023–24":ser===2?(m[4].startsWith("v")?"Lunar Lake · late 2024":"Arrow Lake · late 2024–25"):"Panther Lake · 2026"}`, id: ser===3?"u3":"u1", rid: ser===3?"rU3":"rU12"}; }
   // plain Core 3/5/7 (no i): "core 5 120u", "core 7 240h"
   m = s.match(/core\s*([357])\s*-?\s*([12])(\d\d)([a-z]*)/);
-  if(m) return {txt:`Core ${m[1]} (non-Ultra) <b>Series ${m[2]}</b> · ${m[2]==="1"?"2024 (refreshed 13th-gen silicon)":"2025 (refreshed 12th/13th-gen silicon)"}`, id:"u1"};
+  if(m) return {txt:`Core ${m[1]} (non-Ultra) <b>Series ${m[2]}</b> · ${m[2]==="1"?"2024 (refreshed 13th-gen silicon)":"2025 (refreshed 12th/13th-gen silicon)"}`, id:"u1", rid:"rC"};
   // Core 2: T7500, P8600, SU7300, Q9000, E8400, L7500
   if(!/i[3579]/.test(s)){ m = s.match(/\b(t|p|su|sl|sp|q|qx|x|e|l|u)\s*-?\s*(\d{4,5})\b/);
-    if(m) return {txt:"<b>Core 2</b> era (Core 2 Duo/Quad) · 2006–2010 — before 1st gen", id:"c2"}; }
+    if(m) return {txt:"<b>Core 2</b> era (Core 2 Duo/Quad) · 2006–2010 — before 1st gen", id:"c2", rid:"rC2b"}; }
   // Core i: grab digits after i3/i5/i7/i9 or bare number
   m = s.match(/i\s*[3579]\s*-?\s*(\d{3,5})([a-z]*\d?)/) || s.match(/^(\d{3,5})([a-z]*\d?)$/);
   if(m){ const d=m[1], suf=(m[2]||"").toUpperCase(); let g;
@@ -239,18 +302,21 @@ function decode(raw){
     else if(d.length===5) g=+d.slice(0,2);
     else if(d[0]==="1") g=+d.slice(0,2);      // 1035G1, 1135G7, 1235U, 1335U
     else g=+d[0];
-    if(GEN_MAP[g]) return {txt:`<b>${INFO[g]}</b>${suf?` · suffix <code>${suf}</code>`:""}`, id:GEN_MAP[g]};
+    if(GEN_MAP[g]) return {txt:`<b>${INFO[g]}</b>${suf?` · suffix <code>${suf}</code>`:""}`, id:GEN_MAP[g], rid:ROWMAP[g]};
   }
   return {txt:"Couldn't parse that — try formats like <code>i5-8250U</code>, <code>1165G7</code>, <code>Ultra 7 155H</code>.", id:null};
 }
 const q=document.getElementById("q"), out=document.getElementById("result");
-let lastHit=null, t;
+let hits=[];
 q.addEventListener("input", () => {
   const r = decode(q.value);
-  if(lastHit){ lastHit.classList.remove("hit"); lastHit=null; }
+  hits.forEach(h=>h.classList.remove("hit")); hits=[];
   if(!r){ out.innerHTML=""; return; }
-  out.innerHTML = r.txt + (r.id?` — <a href="#${r.id}">see badge ↓</a>`:"");
-  if(r.id){ lastHit=document.getElementById(r.id); lastHit.classList.add("hit"); }
+  out.innerHTML = r.txt + (r.id?` — <a href="#" id="seeb">see badge ↓</a>`:"");
+  if(r.id){ hits=[document.getElementById(r.id), document.getElementById(r.rid)].filter(Boolean); hits.forEach(h=>h.classList.add("hit"));
+    document.getElementById("seeb").onclick = ev => { ev.preventDefault();
+      const tgt = document.body.classList.contains("compact") ? r.rid : r.id;
+      document.getElementById(tgt).scrollIntoView({behavior:"smooth"}); }; }
 });
 q.addEventListener("keydown", e => { if(e.key==="Enter"){ const a=out.querySelector("a"); if(a){ q.blur(); a.click(); } }});
 </script>
