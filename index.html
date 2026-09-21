@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
-<title>Intel Badge Finder</title>
+<title>CPU Badge Finder</title>
 <style>
 :root{
   --bg:#f4f5f7; --card:#ffffff; --ink:#15171a; --muted:#5d6570; --line:#e1e4e8;
@@ -21,7 +21,8 @@ body{margin:0;background:var(--bg);color:var(--ink);
   -webkit-text-size-adjust:100%}
 header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
   padding:calc(8px + env(safe-area-inset-top)) 0 6px}
-.top{display:flex;align-items:baseline;justify-content:space-between;padding:0 16px}
+.top{display:flex;align-items:center;gap:8px;padding:0 16px}
+.top h1{flex:1;white-space:nowrap}
 h1{font-size:17px;margin:0;letter-spacing:-.01em}
 .top small{color:var(--muted);font-size:12px}
 nav{display:flex;gap:6px;overflow-x:auto;padding:8px 16px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -87,18 +88,27 @@ footer a{color:var(--accent)}
 body.compact #nav, body.compact details, body.compact #topwarn, body.compact #cards{display:none}
 body:not(.compact) #list{display:none}
 @media (min-width:900px){ #list{display:grid;grid-template-columns:1fr 1fr;gap:8px} body:not(.compact) #list{display:none} }
+.amdnote{font-size:13px;margin:0 0 10px}
+.row .src{display:inline-block;margin-top:2px;font-size:12px;color:var(--accent);text-decoration:none}
+.row .noimg{height:56px;width:64px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px dashed var(--line);border-radius:5px;font-size:9.5px;color:var(--muted)}
+#amd{display:none}
+body.amd #amd{display:block}
+body.amd #nav, body.amd details:not(.amdd), body.amd #topwarn, body.amd #cards, body.amd #list, body.amd #vseg{display:none!important}
+#amdlist{display:flex;flex-direction:column;gap:6px}
+@media (min-width:900px){ #amdlist{display:grid;grid-template-columns:1fr 1fr;gap:8px} }
+.amd .seg button.on, body.amd #bseg button.on{background:#c8102e}
 </style>
 </head>
 <body>
 <header>
-  <div class="top"><h1>Intel Badge Finder</h1><div class="seg" role="group" aria-label="View"><button data-m="compact">Compact</button><button data-m="detail">Detailed</button></div></div>
+  <div class="top"><h1>CPU Badges</h1><div class="seg" id="bseg" role="group" aria-label="Brand"><button data-b="intel">Intel</button><button data-b="amd">AMD</button></div><div class="seg" id="vseg" role="group" aria-label="View"><button data-m="compact">Compact</button><button data-m="detail">Detailed</button></div></div>
   <nav id="nav"></nav>
 </header>
 
 <main>
   <div class="decoder">
-    <label for="q">Have a model number? Type it — it beats the sticker.</label>
-    <input id="q" placeholder="e.g. i5-8250U, 1165G7, Ultra 7 155H, T7500" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <label for="q">Have a model number (Intel or AMD)? Type it — it beats the sticker.</label>
+    <input id="q" placeholder="e.g. i5-8250U, 1165G7, Ultra 7 155H, Ryzen 5 5500U, A6-9220" autocomplete="off" autocapitalize="off" spellcheck="false">
     <div id="result"></div>
   </div>
 
@@ -126,11 +136,32 @@ body:not(.compact) #list{display:none}
   <div class="warn" id="topwarn" style="margin:0 0 12px">Stickers are the weakest clue. Palmrests get swapped, badges get re-applied, and near-identical designs cover several gens (4th/5th, 6th–8th, 11th–14th, Ultra S1/S2). When the listing shows a model number (sticker on bottom, BIOS, "System" screen, CPU-Z), trust that instead.</div>
 
   <div id="list"></div>
+  <section id="amd">
+    <div class="warn amdnote">AMD stickers change much less than Intel's, so treat them as an era guide. A sticker can tell you roughly the decade (pre-Ryzen vs Ryzen vs Ryzen AI), but only the model number pins down the chip. Ryzen laptop badges aren't online as images I can link, so those rows show text plus a photo-search link.</div>
+    <div id="amdlist"></div>
+    <details class="amdd" style="margin-top:12px">
+      <summary>AMD number cheat-sheet (Ryzen traps)</summary>
+      <div class="body">
+        <p><span class="k">Ryzen mobile:</span> first digit = the year's "series", <b>not</b> the architecture. <code>2500U</code> 2018 · <code>3500U</code> 2019 · <code>4500U</code> 2020 · <code>5500U</code> 2021 · <code>6600U</code> 2022 · <code>7530U</code> 2023 · <code>8640U</code> 2024.</p>
+        <p><span class="k">5000 trap:</span> <code>5300U/5500U/5700U</code> are older Zen 2 chips. <code>5400U/5600U/5800U</code> and <code>5x25U</code> are Zen 3.</p>
+        <p><span class="k">7000 trap (3rd digit = architecture):</span> <code>7x20</code> = Zen 2 (budget, 2020-level) · <code>7x30</code> = Zen 3 · <code>7x35</code> = Zen 3+ · <code>7x40/7x45</code> = Zen 4. The 7000 badge is orange for Zen 4 and grey for the older chips.</p>
+        <p><span class="k">Value jumps:</span> 3000 → 4000 mobile (Zen+ → Zen 2, core count doubles) is the big one. Anything pre-Ryzen (A-Series, E-Series, Turion) is low value.</p>
+        <table>
+          <tr><th>Suffix</th><th>Meaning</th></tr>
+          <tr><td><code>U</code></td><td>Thin/business, low power</td></tr>
+          <tr><td><code>H</code> / <code>HS</code></td><td>Performance / thin performance</td></tr>
+          <tr><td><code>HX</code></td><td>Desktop-class gaming laptop</td></tr>
+          <tr><td><code>PRO</code></td><td>Business version (ThinkPad, EliteBook), same generation</td></tr>
+          <tr><td><code>e</code> / <code>C</code></td><td>Very low power (Chromebooks, cheap laptops)</td></tr>
+        </table>
+      </div>
+    </details>
+  </section>
   <div class="grid" id="cards"></div>
 </main>
 
 <footer>
-  Badge images are loaded live from <a href="https://logos.fandom.com/wiki/Intel_Core/Models">Logopedia</a> (and one from Wikimedia Commons) and aren't stored in this file, so the page needs internet. Badges © Intel. Built Sept 2026. Next up is "Nova Lake" (Core Ultra 400), expected at the end of 2026 or early 2027.
+  Badge images are loaded live from <a href="https://logos.fandom.com/wiki/Intel_Core/Models">Logopedia</a> (and one from Wikimedia Commons) and aren't stored in this file, so the page needs internet. Badges © Intel / AMD. AMD badge images: Logopedia. Built Sept 2026. Next up is "Nova Lake" (Core Ultra 400), expected at the end of 2026 or early 2027.
 </footer>
 
 <div id="lb"><img alt=""><p></p></div>
@@ -258,18 +289,109 @@ list.innerHTML = ROWS.map(r => `
 // ---------- view mode ----------
 function setMode(m){
   document.body.classList.toggle("compact", m==="compact");
-  document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on", b.dataset.m===m));
+  document.querySelectorAll("#vseg button").forEach(b=>b.classList.toggle("on", b.dataset.m===m));
   try{ localStorage.setItem("ibf-mode", m); }catch(e){}
 }
 let mode = "compact";
 try{ mode = localStorage.getItem("ibf-mode") || "compact"; }catch(e){}
 setMode(mode);
-document.querySelector(".seg").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ setMode(b.dataset.m); scrollTo(0,0); } });
+document.getElementById("vseg").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ setMode(b.dataset.m); scrollTo(0,0); } });
 list.addEventListener("click", e => {
   const g = e.target.closest("[data-go]"); if(!g) return;
   setMode("detail");
   requestAnimationFrame(()=>document.getElementById(g.dataset.go).scrollIntoView({behavior:"smooth"}));
 });
+
+
+// ---------- AMD ----------
+const GI = q => "https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(q);
+const AMDROWS = [
+ {rid:"aTur1", t:"Turion 64 / Sempron", y:"2005–07", d:"Light badge with coloured ribbon · single-core era", im:[[L("0/07/AMD_Turion_64_Mobile_Technology_%282005%29.svg"),"Turion 64"],[L("2/22/AMD_Sempron_%282003%29.svg"),"Sempron"]], s:"AMD Turion 64 laptop sticker"},
+ {rid:"aTur2", grp:1, t:"Turion X2 / Athlon II / Phenom II", y:"2007–11", d:"Dark grey square, white AMD logo, coloured swoosh · dual-core", im:[[L("9/9d/Turionx2ultra2007-2010.jpg"),"Turion X2 Ultra"],[L("0/03/AMD_Phenom_II_%282008%29.svg"),"Phenom II"]], s:"AMD Turion II Athlon II laptop sticker"},
+ {rid:"aVis", t:"VISION stickers", y:"2009–12", d:"“VISION” / Premium / Ultimate / Black, often instead of a CPU badge · also E-350, C-50 netbooks", im:[], s:"AMD VISION laptop sticker"},
+ {rid:"aA1", t:"A-Series (1st design)", y:"2011–13", d:"Glossy red “A-SERIES” · Llano / Trinity (A6-3400M, A8-4500M, A10-4600M)", im:[[L("3/31/AMDAseries2011-2013.jpg"),"A-Series 2011–13"]], s:"AMD A-Series 2012 laptop sticker"},
+ {rid:"aA2", t:"A-Series (black/red “A”)", y:"2013–16", d:"Black square, big red “A” · Kaveri / Carrizo (A8-6410, A10-7300, A10-8700P)", im:[[L("a/ab/AMDAseries2013.jpg"),"A-Series 2013–16"],[L("0/0d/AMD_Athlon_logotipo.png"),"Athlon 2013–16"]], s:"AMD A10 A8 laptop sticker black red"},
+ {rid:"aA3", t:"A-Series 7th gen / Athlon (silver)", y:"2016–19", d:"Silver frame, red logo · Bristol / Stoney Ridge (A9-9420, A6-9220), common in cheap laptops", im:[[L("a/a9/A-series-badge.jpg"),"A-Series 7th gen"],[L("f/ff/Amd_athlon_2016-2018_%28HD%29.png"),"Athlon 2016–18"]], s:"AMD A9 A6 7th generation sticker"},
+ {rid:"aAth", t:"Athlon Silver / Gold", y:"2018–23", d:"White/silver badge with Athlon ring · budget Zen (Athlon 3050U, Silver 7120U)", im:[[L("3/3d/Amd_athlon_silver.jpg"),"Athlon Silver"],[L("9/9c/Amd_athlon_gold.png"),"Athlon Gold"]], s:"AMD Athlon Silver laptop sticker"},
+ {rid:"aRyz", grp:1, t:"Ryzen 2000–6000", y:"2018–22", d:"Black badge, Ryzen ring logo, tier 3/5/7/9 · early ones often have a separate “Radeon Vega Graphics” sticker · some later ones print “4000/5000 Series”", im:[[L("7/7a/Ryzen.svg"),"Ryzen brand logo (not the badge)"]], s:"AMD Ryzen 5 laptop sticker"},
+ {rid:"aRyz7", t:"Ryzen 7000", y:"2023", d:"“7000 Series” badge · <b>orange</b> = Zen 4 (7x40/7x45) · <b>grey</b> = older Zen 2/3 (7x20/7x30/7x35)", im:[], s:"AMD Ryzen 7000 series laptop sticker orange"},
+ {rid:"aRyz8", t:"Ryzen 8040 / Ryzen 200", y:"2024–25", d:"Zen 4 refresh (8640U, 8840HS → renamed Ryzen 7 260 etc.) · check the model number", im:[], s:"AMD Ryzen 8040 laptop sticker"},
+ {rid:"aAI", t:"Ryzen AI 300 / AI Max / AI 400", y:"2024–26", d:"“Ryzen AI” branding · Zen 5 (AI 9 HX 370, AI 7 350, AI Max+ 395, AI 9 HX 470)", im:[], s:"AMD Ryzen AI 300 laptop sticker"}
+];
+document.getElementById("amdlist").innerHTML = AMDROWS.map(r => `
+  <div class="row${r.grp?" grp":""}" id="${r.rid}">
+    <div class="th">${r.im.length ? r.im.map(([src,cap])=>`<img src="${src}" alt="${cap}" loading="lazy" referrerpolicy="no-referrer" data-cap="${r.t} — ${cap}" onerror="this.style.visibility='hidden'">`).join("") : `<div class="noimg">no badge image online</div>`}</div>
+    <div class="tx" style="cursor:default"><div class="t1">${r.t} · ${r.y}</div><div class="t2">${r.d}</div>
+      <a class="src" href="${GI(r.s)}" target="_blank" rel="noopener">photos of real stickers ↗</a></div>
+  </div>`).join("");
+
+function decodeAMD(s){
+  s = s.replace(/amd/g,"").replace(/\s+/g," ").trim();
+  const R = (txt,rid) => ({txt, rid, amd:true, id:rid});
+  let m;
+  // Ryzen AI (300 / Max / 400)
+  if(/\bai\b/.test(s) && /ryzen|^ai|\bai\s*(max|[3579])/.test(s)){
+    const n = (s.match(/\b(\d{3})\b/)||[])[1];
+    if(/max/.test(s)) return R("<b>Ryzen AI Max</b> · Strix Halo · Zen 5 · 2025", "aAI");
+    if(n && n[0]==="3") return R("<b>Ryzen AI 300</b> · Strix Point / Krackan · Zen 5 · 2024–25", "aAI");
+    if(n && n[0]==="4") return R("<b>Ryzen AI 400</b> · Gorgon Point · Zen 5 · 2026", "aAI");
+    return R("<b>Ryzen AI</b> family · 2024+", "aAI");
+  }
+  if(/ryzen|^r[3579]\b/.test(s)){
+    m = s.match(/\b(\d)(\d)(\d)(\d)\s*([a-z]*)/);
+    if(m){ const [_,a,b,c,d,suf]=m; const mob=/^(u|h|hs|hx)/.test(suf); let t;
+      switch(a){
+        case "1": t="Ryzen 1000 · Zen · 2017 (desktop)"; break;
+        case "2": t= mob?"Ryzen 2000 mobile · Zen · 2018":"Ryzen 2000 · Zen/Zen+ · 2018"; break;
+        case "3": t= mob?"Ryzen 3000 mobile · Zen+ · 2019":"Ryzen 3000 desktop · Zen 2 · 2019"; break;
+        case "4": t="Ryzen 4000 · Zen 2 · 2020"; break;
+        case "5": t= !mob?"Ryzen 5000 desktop · Zen 3 · 2020–22": c==="2"?"Ryzen 5000 (5x25) · Zen 3 · 2022": (["3","5","7"].includes(b)&&c==="0"? "Ryzen 5000 · <u>Zen 2</u> (older design!) · 2021":"Ryzen 5000 · Zen 3 · 2021"); break;
+        case "6": t="Ryzen 6000 · Zen 3+ · 2022"; break;
+        case "7": if(!mob){ t="Ryzen 7000 desktop · Zen 4 · 2022–23"; break; }
+          t = c==="2"?"Ryzen 7000 (7x20) · <u>Zen 2</u>, budget · 2022–23 · grey badge"
+            : c==="3"? (d==="5"?"Ryzen 7000 (7x35) · Zen 3+ · 2023 · grey badge":"Ryzen 7000 (7x30) · Zen 3 · 2023 · grey badge")
+            : c==="4"? (d==="5"?"Ryzen 7000 (7x45) · Zen 4 HX · 2023 · orange badge":"Ryzen 7000 (7x40) · Zen 4 · 2023 · orange badge") : "Ryzen 7000 · 2023";
+          return R(`<b>${t}</b>`, "aRyz7");
+        case "8": t= mob?"Ryzen 8040 · Zen 4 · 2024":"Ryzen 8000G desktop · Zen 4 · 2024"; return R(`<b>${t}</b>`, "aRyz8");
+        case "9": t= mob?"Ryzen 9000 HX · Zen 5 · 2025":"Ryzen 9000 desktop · Zen 5 · 2024"; return R(`<b>${t}</b>`, "aAI");
+      }
+      return R(`<b>${t}</b>${suf?` · suffix <code>${suf.toUpperCase()}</code>`:""}`, "aRyz");
+    }
+    m = s.match(/\b2(\d\d)\b/);
+    if(m) return R("<b>Ryzen 200 series</b> · Zen 4 (renamed 8040) · 2025", "aRyz8");
+    return R("Ryzen family (2018+). Add the 4-digit model for details.", "aRyz");
+  }
+  if(/athlon/.test(s)){
+    if(/\bii\b|\b[pmnk]\d{3}\b/.test(s)) return R("<b>Athlon II</b> mobile · 2009–11", "aTur2");
+    if(/64|x2|\btk-?\d|\bql-?\d/.test(s)) return R("<b>Athlon 64 / X2</b> mobile · 2006–09", "aTur2");
+    m = s.match(/\b(\d{3,4})\s*([a-z]*)/);
+    if(m && (m[1].length===3 || /^[37]/.test(m[1]))) return R(`<b>Athlon ${/silver|gold/.test(s)?"Silver/Gold ":""}${m[1]}</b> · budget Zen · ${m[1][0]==="7"?"2022–23":"2019–20"}`, "aAth");
+    return R("<b>Athlon</b> · name used 1999–today; add the model number", "aAth");
+  }
+  m = s.match(/\ba(4|6|8|9|10|12)\s*-?\s*(\d)(\d{3})([a-z]*)/);
+  if(m){ const y={3:"Llano · 2011",4:"Trinity · 2012",5:"Richland/Kabini · 2013",6:"Kabini/Beema · 2013–14",7:"Kaveri/Carrizo-L · 2014–15",8:"Carrizo · 2015",9:"Bristol/Stoney Ridge · 2016–18"}[m[2]];
+    if(y) return R(`<b>A-Series</b> · ${y}`, +m[2]<=5?"aA1":+m[2]<=8?"aA2":"aA3"); }
+  m = s.match(/\be([12])?\s*-\s*(\d{3,4})/);
+  if(m){ const n=m[2]; if(n.length===3) return R("<b>E-Series</b> (E-350/E-450) · 2011 · VISION era", "aVis");
+    const y={1:"2012",2:"2013",3:"2013",6:"2014",7:"2015",9:"2016–17"}[n[0]];
+    if(y) return R(`<b>E-Series</b> budget · ${y}`, n[0]==="9"?"aA3":+n[0]>=6?"aA2":"aA1"); }
+  if(/\bc-?(30|50|60|70)\b/.test(s)) return R("<b>C-Series</b> netbook · 2011", "aVis");
+  if(/turion|phenom|sempron|\b(tl|ml|mt|zm|rm|mk|tk|ql)-?\d\d\b|\b[pnmv]\d{3}\b/.test(s)){
+    if(/\b(ml|mt|tl)-?\d\d|turion 64/.test(s)) return R("<b>Turion 64 / Turion 64 X2</b> · 2005–07", "aTur1");
+    if(/sempron/.test(s)) return R("<b>Sempron</b> mobile · 2004–10 (budget; sticker style tells the era)", "aTur1");
+    if(/\b[pnmv]\d{3}\b|\bii\b/.test(s)) return R("<b>Turion II / Phenom II / Athlon II</b> mobile · 2009–11", "aTur2");
+    return R("<b>Turion X2</b> era · 2007–09", "aTur2");
+  }
+  return null;
+}
+function setBrand(b){
+  document.body.classList.toggle("amd", b==="amd");
+  document.querySelectorAll("#bseg button").forEach(x=>x.classList.toggle("on", x.dataset.b===b));
+  try{ localStorage.setItem("ibf-brand", b); }catch(e){}
+}
+let brand="intel"; try{ brand = localStorage.getItem("ibf-brand") || "intel"; }catch(e){}
+setBrand(brand);
+document.getElementById("bseg").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ setBrand(b.dataset.b); scrollTo(0,0); } });
 
 // ---------- lightbox ----------
 const lb = document.getElementById("lb");
@@ -285,6 +407,7 @@ lb.addEventListener("click", () => lb.classList.remove("on"));
 function decode(raw){
   let s = raw.toLowerCase().replace(/intel|®|™|processor|cpu/g,"").replace(/[\s_]+/g," ").trim();
   if(!s) return null;
+  if(/amd|ryzen|athlon|turion|phenom|sempron|\ba(4|6|8|9|10|12)\s*-|\be[12]?\s*-\s*\d|\bc-?(30|50|60|70)\b|\b(tl|ml|mt|zm|rm|mk|tk|ql)-\d\d|^ai\b|^r[3579]\b/.test(s)){ const a=decodeAMD(s); if(a) return a; }
   // Core Ultra: "ultra 7 155h", "ultra x9 388h", "u7 258v"
   let m = s.match(/(?:ultra|u)\s*x?\s*([3579])\s*-?\s*([1-4])(\d\d)([a-z]*)/);
   if(m){ const ser=+m[2]; if(ser===4) return {txt:"Core Ultra 400 (Nova Lake) — newer than this chart", id:"u3", rid:"rU3"};
@@ -313,9 +436,10 @@ q.addEventListener("input", () => {
   hits.forEach(h=>h.classList.remove("hit")); hits=[];
   if(!r){ out.innerHTML=""; return; }
   out.innerHTML = r.txt + (r.id?` — <a href="#" id="seeb">see badge ↓</a>`:"");
-  if(r.id){ hits=[document.getElementById(r.id), document.getElementById(r.rid)].filter(Boolean); hits.forEach(h=>h.classList.add("hit"));
+  if(r.id){ setBrand(r.amd?"amd":"intel");
+    hits=[document.getElementById(r.id), document.getElementById(r.rid)].filter(Boolean); hits.forEach(h=>h.classList.add("hit"));
     document.getElementById("seeb").onclick = ev => { ev.preventDefault();
-      const tgt = document.body.classList.contains("compact") ? r.rid : r.id;
+      const tgt = (r.amd || document.body.classList.contains("compact")) ? r.rid : r.id;
       document.getElementById(tgt).scrollIntoView({behavior:"smooth"}); }; }
 });
 q.addEventListener("keydown", e => { if(e.key==="Enter"){ const a=out.querySelector("a"); if(a){ q.blur(); a.click(); } }});
